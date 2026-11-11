@@ -1,0 +1,19 @@
+{
+  "name": "meeket-browser",
+  "productName": "Meeket Browser",
+  "version": "0.1.0",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --check desktop/main.cjs && node --check desktop/preload.cjs && node --check desktop/ui.js && node --check web/home.js && node --test desktop/navigation.test.cjs",
+    "package:win": "electron-packager . MeeketBrowser --platform=win32 --arch=x64 --out=dist --overwrite --ignore=^/upstream --ignore=^/dist"
+  },
+  "devDependencies": {
+    "electron": "45.3.0",
+    "@electron/packager": "^19.0.0"
+  }
+}

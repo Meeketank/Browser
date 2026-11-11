@@ -1,0 +1,9 @@
+*{box-sizing:border-box}body{margin:0;background:#181a18;color:#f2f4ec;font:13px "Segoe UI",sans-serif}
+nav,form{display:flex;align-items:center;gap:6px;padding:5px 10px;height:41px}nav{background:#111410}
+strong{color:#dcfca7;font-size:19px;margin-right:8px}#tabs{display:flex;min-width:0;overflow:auto;gap:4px}
+.tab{display:flex;min-width:60px;max-width:190px;background:#272c25;border-radius:7px}.tab.active{background:#3c4933}
+button,select,input{border:1px solid #3a4336;border-radius:6px;background:#22271f;color:inherit;font:inherit;padding:5px 8px}
+button,select{cursor:pointer}button:hover{border-color:#dcfca7}button:disabled{opacity:.4;cursor:default}
+.tab button{background:transparent;border-color:transparent}.tab button:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input{flex:1;min-width:40px;background:#111410}#bookmarks{max-width:95px}#ai{color:#182011;background:#dcfca7}
+#status{height:18px;color:#ffd691;padding:0 12px;overflow:hidden;white-space:nowrap}

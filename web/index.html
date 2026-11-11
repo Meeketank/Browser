@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; object-src 'none'; base-uri 'none'; form-action https://www.google.com">
+<title>Meeket Browser</title><link rel="stylesheet" href="home.css"><script defer src="home.js"></script></head>
+<body><header><strong><span>M</span> Meeket Browser</strong><a href="https://github.com/Meeketank/Browser/releases">Desktop releases ↗</a></header>
+<main><h1>Where do you<br><em>want to go?</em></h1>
+<form action="https://www.google.com/search" method="get"><label for="query">Search the web</label><div class="search">
+<input id="query" name="q" type="search" placeholder="Search Google" required>
+<button>Search</button><button name="udm" value="50">AI Search</button></div></form>
+<section aria-labelledby="shortcuts-title"><div class="heading"><h2 id="shortcuts-title">Shortcuts</h2><button id="add" type="button" hidden>+ Add shortcut</button></div>
+<div id="links"><a href="https://github.com/Meeketank/MeeBI">MeeBI ↗</a><a href="https://drive.google.com/">Google Drive ↗</a><a href="https://mail.google.com/">Gmail ↗</a></div>
+<form id="shortcut" hidden><label>Label<input name="label" maxlength="50" required></label><label>Website URL<input name="url" type="url" placeholder="https://" required></label><button>Add</button><button type="button" id="cancel">Cancel</button></form><p id="status" role="status"></p>
+</section></main></body></html>
