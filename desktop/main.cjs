@@ -3,19 +3,22 @@ const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
-const { isWebUrl, destination } = require('./navigation.cjs');
+const { isWebUrl, destination } = require('../web/navigation.js');
 
 const toolbar = path.join(__dirname, 'ui.html');
 const toolbarUrl = pathToFileURL(toolbar).href;
 const home = pathToFileURL(path.join(__dirname, '../web/index.html')).href;
 const isolated = { sandbox: true, contextIsolation: true, nodeIntegration: false };
 const partition = 'persist:meeket-web';
+const maxTabs = 20;
+app.setPath('userData', path.join(app.getPath('appData'), 'Meeket Browser'));
 const tabs = new Map();
 let window;
 let active;
 let nextId = 1;
 let bookmarks = [];
 let status = '';
+let closing = false;
 
 function stateFile() {
   return path.join(app.getPath('userData'), 'workspace.json');
@@ -25,7 +28,7 @@ function persist() {
   try {
     fs.writeFileSync(stateFile() + '.tmp', JSON.stringify({
       bookmarks,
-      pages: [...tabs.values()].map(tab => tab.url).filter(isWebUrl).slice(0, 20),
+      pages: [...tabs.values()].map(tab => tab.url).filter(isWebUrl),
     }));
     fs.renameSync(stateFile() + '.tmp', stateFile());
   } catch (error) {
@@ -52,6 +55,8 @@ function layout() {
 
 function select(id) {
   if (!tabs.has(id)) return;
+  if (id === active) return;
+  status = '';
   if (tabs.has(active)) window.contentView.removeChildView(tabs.get(active).view);
   active = id;
   window.contentView.addChildView(tabs.get(id).view);
@@ -69,6 +74,12 @@ function load(contents, url) {
 }
 
 function openTab(url = home, background = false) {
+  if (closing) return;
+  if (tabs.size >= maxTabs) {
+    status = 'Close a tab before opening another.';
+    publish();
+    return;
+  }
   const id = nextId++;
   const view = new WebContentsView({ webPreferences: { ...isolated, partition } });
   const tab = { id, view, url, title: url === home ? 'New tab' : url };
@@ -76,16 +87,18 @@ function openTab(url = home, background = false) {
   const contents = view.webContents;
   const guard = (event, target) => {
     const url = typeof target === 'string' ? target : (target?.url ?? event.url);
-    if (url !== home && !isWebUrl(url)) event.preventDefault();
+    if (!isWebUrl(url)) event.preventDefault();
   };
   contents.on('will-navigate', guard);
   contents.on('will-redirect', guard);
   contents.setWindowOpenHandler(({ url: target }) => {
-    if (isWebUrl(target)) setImmediate(() => { if (!window.isDestroyed()) openTab(target); });
+    if (isWebUrl(target)) setImmediate(() => openTab(target));
     return { action: 'deny' };
   });
   function record(_event, target) {
     if (target !== home && !isWebUrl(target)) return;
+    if (closing) return;
+    if (active === id) status = '';
     tab.url = target;
     tab.title = target === home ? 'New tab' : contents.getTitle() || target;
     persist();
@@ -96,7 +109,12 @@ function openTab(url = home, background = false) {
     if (mainFrame) record(event, url);
   });
   contents.on('page-title-updated', (_event, title) => {
-    tab.title = tab.url === home ? 'New tab' : title;
+    tab.title = tab.url === home ? 'New tab' : (title || tab.url);
+    publish();
+  });
+  contents.on('render-process-gone', () => {
+    if (closing || active !== id) return;
+    status = 'This page stopped responding. Reload it to try again.';
     publish();
   });
   contents.on('before-input-event', shortcut);
@@ -110,6 +128,7 @@ function closeTab(id) {
   const wasActive = active === id;
   if (wasActive) window.contentView.removeChildView(tab.view);
   tabs.delete(id);
+  if (wasActive) active = undefined;
   tab.view.webContents.close();
   if (wasActive && tabs.size) select([...tabs.keys()].at(-1));
   if (!tabs.size) openTab();
@@ -131,9 +150,9 @@ function shortcut(event, input) {
 }
 
 function openInLadybird(url) {
-  const binary = process.env.MEEKET_LADYBIRD_BINARY;
+  const binary = process.env.MEENAV_LADYBIRD_BINARY || process.env.MEEKET_LADYBIRD_BINARY;
   if (!binary || !path.isAbsolute(binary)) {
-    status = 'Set MEEKET_LADYBIRD_BINARY to an absolute executable path.';
+    status = 'Set MEENAV_LADYBIRD_BINARY to an absolute executable path.';
     return;
   }
   if (!isWebUrl(url)) {
@@ -182,11 +201,16 @@ ipcMain.on('browser:action', (event, action, value) => {
 
 if (!app.requestSingleInstanceLock()) app.quit();
 else app.whenReady().then(() => {
+  app.on('second-instance', () => {
+    if (closing || !window) return;
+    if (window.isMinimized()) window.restore();
+    window.focus();
+  });
   const web = session.fromPartition(partition);
   web.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
   web.setPermissionCheckHandler(() => false);
   window = new BrowserWindow({
-    title: 'Meeket Browser', width: 1260, height: 820, minWidth: 740, minHeight: 420,
+    title: 'MeeNav', width: 1260, height: 820, minWidth: 740, minHeight: 420,
     webPreferences: { ...isolated, preload: path.join(__dirname, 'preload.cjs') },
   });
   window.removeMenu();
@@ -194,7 +218,7 @@ else app.whenReady().then(() => {
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   window.webContents.on('before-input-event', shortcut);
   window.on('resize', layout);
-  window.on('close', persist);
+  window.on('close', () => { closing = true; persist(); });
   window.on('closed', () => {
     for (const { view } of tabs.values()) {
       if (!view.webContents.isDestroyed()) view.webContents.close();
@@ -204,7 +228,7 @@ else app.whenReady().then(() => {
   let pages = [];
   try {
     const profile = JSON.parse(fs.readFileSync(stateFile(), 'utf8'));
-    if (Array.isArray(profile.pages)) pages = profile.pages.filter(isWebUrl).slice(0, 20);
+    if (Array.isArray(profile.pages)) pages = profile.pages.filter(isWebUrl).slice(0, maxTabs);
     if (Array.isArray(profile.bookmarks)) bookmarks = profile.bookmarks.filter(item => typeof item?.title === 'string' && isWebUrl(item.url)).slice(-100);
   } catch (error) {
     if (error.code !== 'ENOENT') console.error('Workspace restore failed', error);

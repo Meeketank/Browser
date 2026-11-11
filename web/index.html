@@ -1,13 +1,71 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; object-src 'none'; base-uri 'none'; form-action https://www.google.com">
-<title>Meeket Browser</title><link rel="stylesheet" href="home.css"><script defer src="home.js"></script></head>
-<body><header><strong><span>M</span> Meeket Browser</strong><a href="https://github.com/Meeketank/Browser/releases">Desktop releases ↗</a></header>
-<main><h1>Where do you<br><em>want to go?</em></h1>
-<form action="https://www.google.com/search" method="get"><label for="query">Search the web</label><div class="search">
-<input id="query" name="q" type="search" placeholder="Search Google" required>
-<button>Search</button><button name="udm" value="50">AI Search</button></div></form>
-<section aria-labelledby="shortcuts-title"><div class="heading"><h2 id="shortcuts-title">Shortcuts</h2><button id="add" type="button" hidden>+ Add shortcut</button></div>
-<div id="links"><a href="https://github.com/Meeketank/MeeBI">MeeBI ↗</a><a href="https://drive.google.com/">Google Drive ↗</a><a href="https://mail.google.com/">Gmail ↗</a></div>
-<form id="shortcut" hidden><label>Label<input name="label" maxlength="50" required></label><label>Website URL<input name="url" type="url" placeholder="https://" required></label><button>Add</button><button type="button" id="cancel">Cancel</button></form><p id="status" role="status"></p>
-</section></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Search the web and open your tools from the MeeNav workspace.">
+  <meta name="theme-color" content="#101b19">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; object-src 'none'; base-uri 'none'; form-action https://www.google.com">
+  <title>MeeNav</title>
+  <link rel="stylesheet" href="home.css">
+  <script defer src="navigation.js"></script>
+  <script defer src="home.js"></script>
+</head>
+<body>
+  <header class="shell">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">✦</span>MeeNav</a>
+    <a class="desktop" href="https://github.com/Meeketank/Browser/releases">Desktop releases <span aria-hidden="true">↗</span></a>
+  </header>
+  <main class="shell">
+    <section class="hero" aria-labelledby="title">
+      <div class="intro">
+        <h1 id="title">Where to?</h1>
+        <p>Search the web or jump into your tools.</p>
+      </div>
+      <form id="search" action="https://www.google.com/search" method="get" role="search">
+        <label class="sr-only" for="query">Search or enter a website</label>
+        <div class="search-bar">
+          <span class="search-icon" aria-hidden="true"></span>
+          <input id="query" name="q" placeholder="Search Google or enter a website" required maxlength="2048" autocomplete="off" spellcheck="false">
+          <button class="primary" type="submit">Go <span aria-hidden="true">→</span></button>
+        </div>
+        <div class="search-options">
+          <button name="udm" value="50" type="submit">Google AI Mode <span aria-hidden="true">↗</span></button>
+          <span><kbd>/</kbd> to search</span>
+        </div>
+      </form>
+    </section>
+    <section class="workspace" aria-labelledby="shortcuts-title">
+      <div class="section-head">
+        <h2 id="shortcuts-title">Your workspace</h2>
+        <button id="add" type="button" aria-controls="shortcut" aria-expanded="false" hidden>+ Add shortcut</button>
+      </div>
+      <form id="shortcut" hidden>
+        <label>Name<input name="label" maxlength="50" required placeholder="My app"></label>
+        <label>Website address<input name="url" maxlength="2048" required placeholder="https://example.com"></label>
+        <button class="primary" type="submit">Save</button>
+        <button id="cancel" type="button">Cancel</button>
+      </form>
+      <p id="status" role="status"></p>
+      <div id="links" class="grid">
+        <a class="tile" href="https://github.com/Meeketank/MeeBI">
+          <span class="tile-icon mint" aria-hidden="true">▥</span>
+          <span><strong>MeeBI</strong><small>Analytics project on GitHub</small></span>
+          <span class="arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="tile" href="https://drive.google.com/">
+          <span class="tile-icon yellow" aria-hidden="true">△</span>
+          <span><strong>Google Drive</strong><small>Files and folders</small></span>
+          <span class="arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="tile" href="https://mail.google.com/">
+          <span class="tile-icon blue" aria-hidden="true">✉</span>
+          <span><strong>Gmail</strong><small>Email</small></span>
+          <span class="arrow" aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+  </main>
+  <footer class="shell"><span id="mode">Web workspace · Shortcuts saved on this device</span><a href="https://github.com/Meeketank/Browser">GitHub ↗</a></footer>
+</body>
+</html>

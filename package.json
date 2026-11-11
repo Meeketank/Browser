@@ -1,7 +1,7 @@
 {
-  "name": "meeket-browser",
-  "productName": "Meeket Browser",
-  "version": "0.1.0",
+  "name": "meenav",
+  "productName": "MeeNav",
+  "version": "0.2.0",
   "private": true,
   "main": "desktop/main.cjs",
   "engines": {
@@ -9,8 +9,8 @@
   },
   "scripts": {
     "start": "electron .",
-    "test": "node --check desktop/main.cjs && node --check desktop/preload.cjs && node --check desktop/ui.js && node --check web/home.js && node --test desktop/navigation.test.cjs",
-    "package:win": "electron-packager . MeeketBrowser --platform=win32 --arch=x64 --out=dist --overwrite --ignore=^/upstream --ignore=^/dist"
+    "test": "node --check desktop/main.cjs && node --check desktop/preload.cjs && node --check desktop/ui.js && node --check web/home.js && node --check web/navigation.js && node --test desktop/navigation.test.cjs",
+    "package:win": "electron-packager . MeeNav --platform=win32 --arch=x64 --out=dist --overwrite --asar --ignore=^/upstream --ignore=^/dist"
   },
   "devDependencies": {
     "electron": "45.3.0",
